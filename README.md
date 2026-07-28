@@ -54,7 +54,7 @@ if(NOT COMMAND CPMAddPackage)
     include("${CMAKE_CURRENT_BINARY_DIR}/CPM_${CPM_VERSION}.cmake")
 endif()
 
-CPMAddPackage("gh:JeroenVandezande/LowLevelCPPClasses@3.9.0")
+CPMAddPackage("gh:JeroenVandezande/LowLevelCPPClasses@4.0.0")
 
 CPMAddPackage(
     NAME LowLevelCPP_XMC
@@ -68,6 +68,11 @@ target_link_libraries(your_target PRIVATE LowLevelCPP::XMC)
 `LowLevelCPP_XMC` does not have a release tag yet, so this example currently
 tracks `main`. The XMC device support package and XMCLib remain
 application-provided dependencies.
+
+LowLevelCPPClasses v4 uses UnitsNet-CPP quantities for VADC and DAC voltages.
+Pass reference voltages as `ElectricPotential::from_volts(...)`;
+`ReadVoltage()` returns an `ElectricPotential`, while raw converter values
+remain integer counts.
 
 ## Local CMake integration
 
@@ -98,3 +103,20 @@ span. An optional callback can apply `SPIMode` before each transaction.
 default it inserts the selected channel into an already configured VADC queue
 and triggers conversion. Applications using DAVE measurement groups, scan
 sources, or another trigger strategy can supply a trigger callback instead.
+
+## Delay initialization
+
+After clock and system-tick initialization, pass the project’s millisecond
+counter. For a DAVE project using the SYSTIMER APP:
+
+```cpp
+#include "XMCDelay.h"
+#include "systimer.h"
+
+LowLevelEmbedded::XMC::InitDelays(SYSTIMER_GetTickCount);
+```
+
+This initializes all three shared LowLevelCPPClasses callbacks. Microsecond
+delays use the CMSIS DWT cycle counter, with a SysTick fallback for XMC1
+Cortex-M0 devices. Projects without DAVE can pass an RTOS or application tick
+function instead.

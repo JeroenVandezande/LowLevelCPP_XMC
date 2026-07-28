@@ -17,7 +17,7 @@ namespace LowLevelEmbedded
     public:
         XMCDAC(
             XMC_DAC_t* dac,
-            float reference_voltage,
+            unitsnet_cpp::ElectricPotential reference_voltage,
             uint8_t max_channels = 2,
             uint8_t resolution_bits = 12)
             : dac_(dac),
@@ -48,19 +48,21 @@ namespace LowLevelEmbedded
             return max_channels_;
         }
 
-        bool WriteDACVoltage(uint8_t channel, float value) override
+        bool WriteDACVoltage(
+            uint8_t channel,
+            unitsnet_cpp::ElectricPotential value) override
         {
-            if (reference_voltage_ <= 0.0F ||
-                value < 0.0F ||
-                value > reference_voltage_)
+            if (reference_voltage_.volts() <= 0.0F ||
+                value.volts() < 0.0F ||
+                value.volts() > reference_voltage_.volts())
             {
                 return false;
             }
             return WriteDAC(
                 channel,
                 static_cast<ValueT>(
-                    value * static_cast<float>(max_value_) /
-                    reference_voltage_));
+                    value.volts() * static_cast<float>(max_value_) /
+                    reference_voltage_.volts()));
         }
 
         IDACChannel<ValueT>* CreateChannelObject(uint8_t channel) override
@@ -85,7 +87,7 @@ namespace LowLevelEmbedded
         }
 
         XMC_DAC_t* dac_;
-        float reference_voltage_;
+        unitsnet_cpp::ElectricPotential reference_voltage_;
         uint8_t max_channels_;
         ValueT max_value_;
     };

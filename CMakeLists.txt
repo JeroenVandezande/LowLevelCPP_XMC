@@ -14,6 +14,7 @@ target_sources(
         ${CMAKE_CURRENT_SOURCE_DIR}/Devices/I2CControllers/XMCI2CAccess.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Devices/PIOs/XMCIOPin.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Devices/SPIControllers/XMCSPIAccess.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/XMCDelay.h
 )
 
 target_include_directories(
@@ -24,6 +25,7 @@ target_include_directories(
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Devices/I2CControllers>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Devices/PIOs>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Devices/SPIControllers>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utilities>
 )
 
 if(NOT TARGET LowLevelEmbedded)
@@ -41,7 +43,7 @@ if(NOT TARGET LowLevelEmbedded)
     CPMAddPackage(
         NAME LowLevelCPPClasses
         GITHUB_REPOSITORY JeroenVandezande/LowLevelCPPClasses
-        GIT_TAG v3.9.0
+        GIT_TAG v4.0.0
     )
 endif()
 

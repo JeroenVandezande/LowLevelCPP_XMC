@@ -27,7 +27,7 @@ namespace LowLevelEmbedded
 
         XMCVADC(
             std::span<const XMCVADCChannel> channels,
-            float reference_voltage,
+            unitsnet_cpp::ElectricPotential reference_voltage,
             uint8_t resolution_bits = 12,
             uint32_t max_poll_iterations = 100000,
             TriggerConversionCallback trigger_conversion = nullptr,
@@ -116,11 +116,12 @@ namespace LowLevelEmbedded
                 : static_cast<uint8_t>(channels_.size());
         }
 
-        float ReadVoltage(uint8_t channel) override
+        unitsnet_cpp::ElectricPotential ReadVoltage(uint8_t channel) override
         {
             const ValueT result = ReadADC(channel);
-            return static_cast<float>(result) * reference_voltage_ /
-                static_cast<float>(max_adc_value_);
+            return unitsnet_cpp::ElectricPotential::from_volts(
+                static_cast<float>(result) * reference_voltage_.volts() /
+                static_cast<float>(max_adc_value_));
         }
 
         IADCChannel<ValueT>* CreateChannelObject(uint8_t channel) override
@@ -133,7 +134,8 @@ namespace LowLevelEmbedded
             return last_read_succeeded_;
         }
 
-        void SetReferenceVoltage(float reference_voltage)
+        void SetReferenceVoltage(
+            unitsnet_cpp::ElectricPotential reference_voltage)
         {
             reference_voltage_ = reference_voltage;
         }
@@ -155,7 +157,7 @@ namespace LowLevelEmbedded
         }
 
         std::span<const XMCVADCChannel> channels_;
-        float reference_voltage_;
+        unitsnet_cpp::ElectricPotential reference_voltage_;
         uint32_t max_poll_iterations_;
         TriggerConversionCallback trigger_conversion_;
         void* callback_context_;
