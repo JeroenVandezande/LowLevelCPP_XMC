@@ -7,6 +7,11 @@
 #include <functional>
 #include <utility>
 
+#if defined(__has_include) && __has_include("systimer.h")
+#include "systimer.h"
+#define LOWLEVELCPP_XMC_HAS_DAVE_SYSTIMER 1
+#endif
+
 namespace LowLevelEmbedded::XMC
 {
     namespace Detail
@@ -92,4 +97,13 @@ namespace LowLevelEmbedded::XMC
         };
         return true;
     }
+
+#if defined(LOWLEVELCPP_XMC_HAS_DAVE_SYSTIMER)
+    inline void InitDelays()
+    {
+        static_cast<void>(InitDelays(SYSTIMER_GetTickCount));
+    }
+#endif
 } // namespace LowLevelEmbedded::XMC
+
+#undef LOWLEVELCPP_XMC_HAS_DAVE_SYSTIMER
