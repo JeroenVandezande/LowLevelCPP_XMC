@@ -106,17 +106,28 @@ sources, or another trigger strategy can supply a trigger callback instead.
 
 ## Delay initialization
 
-After clock and system-tick initialization, pass the project’s millisecond
-counter. For a DAVE project using the SYSTIMER APP:
+For a DAVE project using the SYSTIMER APP, initialize the default time base
+after clocks and SYSTIMER have started:
 
 ```cpp
 #include "XMCDelay.h"
-#include "systimer.h"
 
-LowLevelEmbedded::XMC::InitDelays(SYSTIMER_GetTickCount);
+LowLevelEmbedded::XMC::InitDelays();
 ```
+
+When `systimer.h` is present, the no-argument overload uses
+`SYSTIMER_GetTickCount`. To use an RTOS or application time base, pass its
+uptime and delay providers explicitly:
+
+```cpp
+LowLevelEmbedded::XMC::InitDelays(
+    ApplicationMillisecondsSinceStartup,
+    ApplicationDelayMilliseconds);
+```
+
+Passing only the uptime provider installs a blocking millisecond delay based
+on that counter. Supplying both callbacks allows an RTOS delay to yield.
 
 This initializes all three shared LowLevelCPPClasses callbacks. Microsecond
 delays use the CMSIS DWT cycle counter, with a SysTick fallback for XMC1
-Cortex-M0 devices. Projects without DAVE can pass an RTOS or application tick
-function instead.
+Cortex-M0 devices.

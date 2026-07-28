@@ -77,31 +77,40 @@ namespace LowLevelEmbedded::XMC
      * A DAVE project can pass SYSTIMER_GetTickCount. Other projects can pass
      * their RTOS or application millisecond counter.
      */
-    inline bool InitDelays(std::function<uint32_t()> millisecondsSinceStartup)
+    inline bool InitDelays(
+        std::function<uint32_t()> millisecondsSinceStartup,
+        std::function<void(uint32_t)> delayMilliseconds)
     {
-        if (!millisecondsSinceStartup)
+        if (!millisecondsSinceStartup || !delayMilliseconds)
         {
             return false;
         }
 
         Detail::InitCycleCounter();
         Utility::millis = std::move(millisecondsSinceStartup);
+        Utility::Delay_ms = std::move(delayMilliseconds);
         Utility::Delay_us = Detail::DelayMicroseconds;
-        Utility::Delay_ms = [](uint32_t milliseconds)
+        return true;
+    }
+
+    inline bool InitDelays(std::function<uint32_t()> millisecondsSinceStartup)
+    {
+        return InitDelays(
+            std::move(millisecondsSinceStartup),
+            [](uint32_t milliseconds)
         {
             const uint32_t start = Utility::millis();
             while (static_cast<uint32_t>(Utility::millis() - start) <
                    milliseconds)
             {
             }
-        };
-        return true;
+        });
     }
 
 #if defined(LOWLEVELCPP_XMC_HAS_DAVE_SYSTIMER)
-    inline void InitDelays()
+    inline bool InitDelays()
     {
-        static_cast<void>(InitDelays(SYSTIMER_GetTickCount));
+        return InitDelays(SYSTIMER_GetTickCount);
     }
 #endif
 } // namespace LowLevelEmbedded::XMC
